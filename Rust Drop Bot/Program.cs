@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Newtonsoft.Json;
@@ -46,8 +45,35 @@ namespace Rust_Drop_Bot
             }
             else
             {
-                string json = File.ReadAllText("stats.json");
-                stats = JsonConvert.DeserializeObject<Streamer[]>(json);
+                Streamer[] old_stats = update_stats();
+                bool old = false;
+                if (old_stats.Length == stats.Length)
+                {
+                    stats = Get_status(status_website, stats.Length);
+                    for(int i = 0; i < stats.Length; i++)
+                    {
+                        if(stats[i].Name != old_stats[i].Name)
+                        {
+                            old = true;
+                        }
+                    }
+                }
+                else
+                {
+                    old = true;
+                }
+
+                if(old == true)
+                {
+                    Console.WriteLine("Updating stats.json with new Round of Drops");
+                    Console.WriteLine("");
+                    stats = Get_status(status_website, stats.Length);
+                    Save_progress(stats);
+                }
+                else
+                {
+                    stats = old_stats;
+                }
             }
 
             for (int i = 0; i < stats.Length; i++)
@@ -69,6 +95,7 @@ namespace Rust_Drop_Bot
             while (true)
             {
                 Console.WriteLine("Finding an unclaimed Streamer who is live right now");
+                Console.WriteLine("");
 
                 int Current_Stream;
                 while (true)
@@ -90,11 +117,12 @@ namespace Rust_Drop_Bot
                         }
                     } while (retry == true);
                     status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
+                    stats = update_stats();
                     bool[] online = OnlineFinder(stats, status_website);
                     Current_Stream = 1337;
                     for (int i = 0; i < stats.Length; i++)
                     {
-                        if(online[i] == true)
+                        if (online[i] == true)
                         {
                             Current_Stream = i;
                             break;
@@ -103,6 +131,7 @@ namespace Rust_Drop_Bot
                     if (Current_Stream == 1337)
                     {
                         Console.WriteLine("Nobody with unclaimed drops is online. Retrying in 1 Minute");
+                        Console.WriteLine("");
                         SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
                         Thread.Sleep(60000);
                     }
@@ -111,13 +140,16 @@ namespace Rust_Drop_Bot
                         break;
                     }
                 }
-                Console.WriteLine(stats[Current_Stream].Name + " is currently streaming");
                 Console.WriteLine("Opening Chrome to watch " + stats[Current_Stream].Name);
                 Console.WriteLine("");
 
                 Process StreamWindow = Process.Start(path, stats[Current_Stream].URL);
+                stats = update_stats();
+                Console.WriteLine(stats[Current_Stream].Watchtime + "/130 Minutes (" + stats[Current_Stream].Name + ")");
                 for (int i = stats[Current_Stream].Watchtime; i < 130; i++)
                 {
+                    SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
+                    Thread.Sleep(60000);
                     try
                     {
                         status_website = Get("https://twitch.facepunch.com/");
@@ -126,22 +158,25 @@ namespace Rust_Drop_Bot
                     {
                         Console.WriteLine("Could not reach twitch.facepunch.com to update StreamerData (" + e + ") trying again in one Minute");
                     }
-                status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
+                    status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
                     if (OnlineFinder(stats, status_website)[Current_Stream] == true)
                     {
+                        stats = update_stats();
                         stats[Current_Stream].Watchtime++;
+                        if(stats[Current_Stream].Completed == true)
+                        {
+                            break;
+                        }
                         Save_progress(stats);
-                        Console.WriteLine(i + "/130 Minutes ("+ stats[Current_Stream].Name + ")" );
+                        Console.WriteLine(stats[Current_Stream].Watchtime + "/130 Minutes (" + stats[Current_Stream].Name + ")");
                     }
                     else
                     {
                         Console.WriteLine(stats[Current_Stream].Name + " is no longer online");
                         break;
                     }
-                    SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
-                    Thread.Sleep(60000);
                 }
-                if (stats[Current_Stream].Watchtime >= 130)
+                if (stats[Current_Stream].Watchtime >= 130 || stats[Current_Stream].Completed == true)
                 {
                     stats[Current_Stream].Completed = true;
                     Save_progress(stats);
@@ -151,7 +186,7 @@ namespace Rust_Drop_Bot
                 {
                     StreamWindow.Kill();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Could not close Streamwindow: " + e);
                 }
@@ -179,7 +214,7 @@ namespace Rust_Drop_Bot
 
         public static Streamer[] Get_status(string website, int j)
         {
-            
+
             Streamer[] stats = new Streamer[j];
             for (int i = 0; i < stats.Length; i++)
             {
@@ -193,7 +228,7 @@ namespace Rust_Drop_Bot
                 }
                 else
                 {
-                    stats[i].Name = stats[i].URL.Substring(26, (stats[i].URL.Length-27));
+                    stats[i].Name = stats[i].URL.Substring(26, (stats[i].URL.Length - 27));
                 }
             }
             return stats;
@@ -211,9 +246,15 @@ namespace Rust_Drop_Bot
             return count;
         }
 
+        public static Streamer[] update_stats()
+        {
+            string json = File.ReadAllText("stats.json");
+            return JsonConvert.DeserializeObject<Streamer[]>(json);
+        }
+
         public static void Save_progress(Streamer[] stats)
         {
-            string json = JsonConvert.SerializeObject(stats);
+            string json = JsonConvert.SerializeObject(stats, Formatting.Indented);
             File.WriteAllText("stats.json", json);
         }
 
