@@ -5,6 +5,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Collections;
 
 namespace Rust_Drop_Bot
 {
@@ -118,14 +119,15 @@ namespace Rust_Drop_Bot
                     } while (retry == true);
                     status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
                     stats = update_stats();
-                    bool[] online = OnlineFinder(stats, status_website);
+                    stats = OnlineFinder(stats, status_website);
                     Current_Stream = 1337;
+                    int highest_Priority = 0;
                     for (int i = 0; i < stats.Length; i++)
                     {
-                        if (online[i] == true)
+                        if (stats[i].online == true && (stats[i].Priority > highest_Priority || highest_Priority == 0))
                         {
+                            highest_Priority = stats[i].Priority;
                             Current_Stream = i;
-                            break;
                         }
                     }
                     if (Current_Stream == 1337)
@@ -159,9 +161,27 @@ namespace Rust_Drop_Bot
                         Console.WriteLine("Could not reach twitch.facepunch.com to update StreamerData (" + e + ") trying again in one Minute");
                     }
                     status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
-                    if (OnlineFinder(stats, status_website)[Current_Stream] == true)
+
+                    stats = update_stats();
+                    Streamer[] new_stats = OnlineFinder(stats, status_website);
+                    bool has_priority = true;
+                    for (int j = 0; j < stats.Length; j++)
                     {
-                        stats = update_stats();
+                        if (new_stats[j].Priority > stats[Current_Stream].Priority && new_stats[j].online == true)
+                        {
+                            has_priority = false;
+                        }
+                    }
+
+                    if (has_priority != true)
+                    {
+                        Console.WriteLine("A Streamer with a higher Priority is now online");
+                        Console.WriteLine("");
+                        break;
+                    }
+
+                    if (new_stats[Current_Stream].online == true)
+                    {
                         stats[Current_Stream].Watchtime++;
                         if(stats[Current_Stream].Completed == true)
                         {
@@ -173,6 +193,7 @@ namespace Rust_Drop_Bot
                     else
                     {
                         Console.WriteLine(stats[Current_Stream].Name + " is no longer online");
+                        Console.WriteLine("");
                         break;
                     }
                 }
@@ -181,6 +202,7 @@ namespace Rust_Drop_Bot
                     stats[Current_Stream].Completed = true;
                     Save_progress(stats);
                     Console.WriteLine("Required Watchtime completed (" + stats[Current_Stream].Name + ")");
+                    Console.WriteLine("");
                 }
                 try
                 {
@@ -189,27 +211,27 @@ namespace Rust_Drop_Bot
                 catch (Exception e)
                 {
                     Console.WriteLine("Could not close Streamwindow: " + e);
+                    Console.WriteLine("");
                 }
 
             }
         }
 
-        public static bool[] OnlineFinder(Streamer[] stats, String website)
+        public static Streamer[] OnlineFinder(Streamer[] stats, String website)
         {
-            bool[] online = new bool[stats.Length];
             for (int i = 0; i < stats.Length; i++)
             {
                 website = website.Substring(website.IndexOf("online-status") + 14);
                 if (stats[i].Completed == false && website.Substring(0, 7) == "is-live")
                 {
-                    online[i] = true;
+                    stats[i].online = true;
                 }
                 else
                 {
-                    online[i] = false;
+                    stats[i].online = false;
                 }
             }
-            return online;
+            return stats;
         }
 
         public static Streamer[] Get_status(string website, int j)
@@ -278,5 +300,15 @@ namespace Rust_Drop_Bot
         public String Name { get; set; }
         public String URL { get; set; }
         public bool Completed { get; set; }
+        public int Priority { get; set; }
+        public bool online { get; set; }
+    }
+
+    class StreamerComparer : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            return (new CaseInsensitiveComparer()).Compare(((Streamer)x).Priority, ((Streamer)y).Priority);
+        }
     }
 }
