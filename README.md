@@ -7,12 +7,13 @@ Chrome and a Twitch Account that is eligible for Drops and logged in on Chrome
 
 # Usage:
 
-1. Download the latest Release from the Releases Page and launch the Application
-2. Paste in your Chrome Installation Path (i.e. "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
+1. If you want to use Auto Claim follow the Setting up Auto Claim Guide 
+2. Download the latest Release from the Releases Page and launch the Application
+3. Paste in your Chrome Installation Path (i.e. "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
 4. If you want to adjust the Program (i.e. edit watchtime or prevent the bot from viewing streamers whose drops you already have/dont want) edit the stats.json file
 5. If the Bot doesnt work try deleting the path.txt and stats.json files that are located in the same folder as the Program
 
-# Setting up Auto Claim;
+<a name="autoclaim">Setting up Auto Claim</a>:
 1. Add the Tampermonkey extension to chrome (https://www.tampermonkey.net/)
 2. Install the Auto Claim Twitch drops Script to Tampermonkey (https://greasyfork.org/en/scripts/420346-auto-claim-twitch-drop)
 
