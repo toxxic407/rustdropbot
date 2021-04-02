@@ -9,13 +9,18 @@ Chrome and a Twitch Account that is eligible for Drops and logged in on Chrome
 
 1. Download the latest Release from the Releases Page and launch the Application
 2. Paste in your Chrome Installation Path (i.e. "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
-4. If you want to adjust the Program (i.e. edit watchtime or prevent the bot from viewing streamers whose drops you already have/dont want) edit the stats.json file and relaunch the program
+4. If you want to adjust the Program (i.e. edit watchtime or prevent the bot from viewing streamers whose drops you already have/dont want) edit the stats.json file
 5. If the Bot doesnt work try deleting the path.txt and stats.json files that are located in the same folder as the Program
+
+# Setting up Auto Claim;
+1. Add the Tampermonkey extension to chrome (https://www.tampermonkey.net/)
+2. Install the Auto Claim Twitch drops Script to Tampermonkey (https://greasyfork.org/en/scripts/420346-auto-claim-twitch-drop)
 
 # Priorities:
 The Bot supports setting Priorities in stats.json (Higher Number = Higher Priority)
 This means that the Bot always tries to watch the Streamer with the highest Priority out of all the Streamers that are online
 
 # Important things to know about this Program:
-1. The Bot doesn't claim the Drops for you it only completes the watchtime
+1. I recommend changing the Stream Quality to the lowest definition and disabling low latency to prevent connection problems from not adding watchtime
+2. Close all Chrome tabs before launching the Bot and do not use Chrome while the Bot is running because it may prevent the Bot from closing Chrome
 3. I am not responsible for any Damage to your Computer/Bans from Twitch/Apocalyptical Events that might because you used this Program
