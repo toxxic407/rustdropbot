@@ -23,4 +23,5 @@ This means that the Bot always tries to watch the Streamer with the highest Prio
 # Important things to know about this Program:
 1. I recommend changing the Stream Quality to the lowest definition and disabling low latency to prevent connection problems from not adding watchtime
 2. Close all Chrome tabs before launching the Bot and do not use Chrome while the Bot is running because it may prevent the Bot from closing Chrome
-3. I am not responsible for any Damage to your Computer/Bans from Twitch/Apocalyptical Events that might because you used this Program
+3. The Auto Claim Twitch drops Script is made by bAdRocK and not by me
+4. I am not responsible for any Damage to your Computer/Bans from Twitch/Apocalyptical Events that might because you used this Program
