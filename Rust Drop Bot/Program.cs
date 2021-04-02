@@ -46,7 +46,7 @@ namespace Rust_Drop_Bot
             }
             else
             {
-                Streamer[] old_stats = update_stats();
+                Streamer[] old_stats = Update_stats();
                 bool old = false;
                 if (old_stats.Length == stats.Length)
                 {
@@ -118,13 +118,13 @@ namespace Rust_Drop_Bot
                         }
                     } while (retry == true);
                     status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
-                    stats = update_stats();
+                    stats = Update_stats();
                     stats = OnlineFinder(stats, status_website);
                     Current_Stream = 1337;
                     int highest_Priority = 0;
                     for (int i = 0; i < stats.Length; i++)
                     {
-                        if (stats[i].online == true && (stats[i].Priority > highest_Priority || highest_Priority == 0))
+                        if (stats[i].Online == true && (stats[i].Priority > highest_Priority || highest_Priority == 0))
                         {
                             highest_Priority = stats[i].Priority;
                             Current_Stream = i;
@@ -146,7 +146,7 @@ namespace Rust_Drop_Bot
                 Console.WriteLine("");
 
                 Process StreamWindow = Process.Start(path, stats[Current_Stream].URL);
-                stats = update_stats();
+                stats = Update_stats();
                 Console.WriteLine(stats[Current_Stream].Watchtime + "/130 Minutes (" + stats[Current_Stream].Name + ")");
                 for (int i = stats[Current_Stream].Watchtime; i < 130; i++)
                 {
@@ -162,12 +162,12 @@ namespace Rust_Drop_Bot
                     }
                     status_website = status_website.Substring(0, status_website.IndexOf("general-drops"));
 
-                    stats = update_stats();
+                    stats = Update_stats();
                     Streamer[] new_stats = OnlineFinder(stats, status_website);
                     bool has_priority = true;
                     for (int j = 0; j < stats.Length; j++)
                     {
-                        if (new_stats[j].Priority > stats[Current_Stream].Priority && new_stats[j].online == true)
+                        if (new_stats[j].Priority > stats[Current_Stream].Priority && new_stats[j].Online == true)
                         {
                             has_priority = false;
                         }
@@ -180,7 +180,7 @@ namespace Rust_Drop_Bot
                         break;
                     }
 
-                    if (new_stats[Current_Stream].online == true)
+                    if (new_stats[Current_Stream].Online == true)
                     {
                         stats[Current_Stream].Watchtime++;
                         if(stats[Current_Stream].Completed == true)
@@ -189,6 +189,7 @@ namespace Rust_Drop_Bot
                         }
                         Save_progress(stats);
                         Console.WriteLine(stats[Current_Stream].Watchtime + "/130 Minutes (" + stats[Current_Stream].Name + ")");
+                        i = stats[Current_Stream].Watchtime;
                     }
                     else
                     {
@@ -214,6 +215,20 @@ namespace Rust_Drop_Bot
                     Console.WriteLine("");
                 }
 
+                Console.WriteLine("Attempting to claim Drops (Only works when Tampermonkey and the Auto Claim Script are installed)");
+                Console.WriteLine("");
+                Process ClaimWindow = Process.Start(path, "https://www.twitch.tv/drops/inventory");
+                SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
+                Thread.Sleep(60000);
+                try
+                {
+                    ClaimWindow.Kill();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Could not close Claimwindow: " + e);
+                    Console.WriteLine("");
+                }
             }
         }
 
@@ -224,11 +239,11 @@ namespace Rust_Drop_Bot
                 website = website.Substring(website.IndexOf("online-status") + 14);
                 if (stats[i].Completed == false && website.Substring(0, 7) == "is-live")
                 {
-                    stats[i].online = true;
+                    stats[i].Online = true;
                 }
                 else
                 {
-                    stats[i].online = false;
+                    stats[i].Online = false;
                 }
             }
             return stats;
@@ -268,7 +283,7 @@ namespace Rust_Drop_Bot
             return count;
         }
 
-        public static Streamer[] update_stats()
+        public static Streamer[] Update_stats()
         {
             string json = File.ReadAllText("stats.json");
             return JsonConvert.DeserializeObject<Streamer[]>(json);
@@ -301,7 +316,7 @@ namespace Rust_Drop_Bot
         public String URL { get; set; }
         public bool Completed { get; set; }
         public int Priority { get; set; }
-        public bool online { get; set; }
+        public bool Online { get; set; }
     }
 
     class StreamerComparer : IComparer
