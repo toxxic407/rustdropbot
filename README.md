@@ -7,7 +7,7 @@ Chrome and a Twitch Account that is eligible for Drops and logged in on Chrome
 
 # Usage:
 
-1. If you want to use Auto Claim follow the [Setting up Auto Claim Guide](#setting-up-auto-claim)
+1. If you want to use Auto Claim follow the [Setting up Auto Claim Guide](#setting-up-auto-claim) before launching the Program
 2. Download the latest Release from the Releases Page and launch the Application
 3. Paste in your Chrome Installation Path (i.e. "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
 4. If you want to adjust the Program (i.e. edit watchtime or prevent the bot from viewing streamers whose drops you already have/dont want) edit the stats.json file
