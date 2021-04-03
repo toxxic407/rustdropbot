@@ -148,7 +148,7 @@ namespace Rust_Drop_Bot
                 Process StreamWindow = Process.Start(path, stats[Current_Stream].URL);
                 stats = Update_stats();
                 Console.WriteLine(stats[Current_Stream].Watchtime + "/130 Minutes (" + stats[Current_Stream].Name + ")");
-                for (int i = stats[Current_Stream].Watchtime; i < 130; i++)
+                for (int i = stats[Current_Stream].Watchtime; i <= 130; i++)
                 {
                     SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS);
                     Thread.Sleep(60000);
